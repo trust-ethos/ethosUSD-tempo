@@ -29,7 +29,7 @@ jobs:
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
         with:
-          project: "serpintaxt-ethosusd-te-45"
+          project: "ethos-usd"
           entrypoint: "main.ts"
           root: "."
           
