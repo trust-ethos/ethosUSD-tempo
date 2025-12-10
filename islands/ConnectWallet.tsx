@@ -99,6 +99,9 @@ export default function ConnectWallet({ onConnect, onDisconnect }: ConnectWallet
       const account = await connectWallet();
       address.value = account;
       onConnect?.(account);
+      
+      // Refresh the page to show the dashboard
+      window.location.reload();
     } catch (err) {
       const message = err instanceof Error ? err.message : "Connection failed";
       if (message.includes("User rejected") || message.includes("user rejected")) {
