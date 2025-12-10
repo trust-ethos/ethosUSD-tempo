@@ -1,0 +1,6 @@
+address,note
+# Add addresses to check for Ethos scores
+# Format: 0x...,optional note
+# Example:
+# 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045,vitalik.eth
+

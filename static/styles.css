@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply bg-ethos-darker text-gray-100 antialiased;
+  }
+  
+  body {
+    @apply min-h-screen font-display;
+    background: 
+      radial-gradient(ellipse at 20% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+      linear-gradient(180deg, #020617 0%, #0f172a 100%);
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-ethos-card/80 backdrop-blur-sm border border-ethos-border rounded-xl;
+  }
+  
+  .btn-primary {
+    @apply px-6 py-3 bg-gradient-to-r from-ethos-primary to-ethos-secondary 
+           text-white font-semibold rounded-lg 
+           hover:opacity-90 transition-all duration-200
+           shadow-lg shadow-ethos-primary/25
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 bg-ethos-card border border-ethos-border
+           text-gray-200 font-medium rounded-lg 
+           hover:bg-ethos-border/50 transition-all duration-200;
+  }
+  
+  .input {
+    @apply w-full px-4 py-3 bg-ethos-dark border border-ethos-border rounded-lg
+           text-gray-100 placeholder-gray-500
+           focus:outline-none focus:ring-2 focus:ring-ethos-primary/50 focus:border-ethos-primary
+           transition-all duration-200;
+  }
+  
+  .label {
+    @apply block text-sm font-medium text-gray-400 mb-2;
+  }
+  
+  .ethos-score {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-mono font-semibold;
+  }
+  
+  .ethos-score-high {
+    @apply ethos-score bg-emerald-500/20 text-emerald-400 border border-emerald-500/30;
+  }
+  
+  .ethos-score-medium {
+    @apply ethos-score bg-amber-500/20 text-amber-400 border border-amber-500/30;
+  }
+  
+  .ethos-score-low {
+    @apply ethos-score bg-red-500/20 text-red-400 border border-red-500/30;
+  }
+  
+  .address {
+    @apply font-mono text-sm text-ethos-accent hover:underline cursor-pointer;
+  }
+  
+  .tx-row {
+    @apply flex items-center justify-between p-4 border-b border-ethos-border/50
+           hover:bg-ethos-dark/30 transition-colors duration-150;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-ethos-primary via-ethos-secondary to-ethos-accent 
+           bg-clip-text text-transparent;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

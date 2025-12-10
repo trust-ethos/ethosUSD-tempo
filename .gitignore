@@ -1,0 +1,32 @@
+# Environment variables (contains private keys!)
+.env
+.env.local
+.env.*.local
+
+# Fresh build output
+_fresh/
+
+# Deno
+.deno/
+deno.lock
+
+# Node modules (if any)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local data
+data/claims.json
+
