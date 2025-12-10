@@ -1,8 +1,44 @@
 // Claims tracking system - tracks who has claimed their ethosUSD
 
 import { getUserData, getScoreByAddress } from "./ethos.ts";
+import { createTempoPublicClient } from "./tempo.ts";
+import { CONTRACTS } from "./contracts.ts";
 
 const CLAIMS_FILE = "./data/claims.json";
+
+// TIP20 ABI for balance check
+const TIP20_BALANCE_ABI = [
+  {
+    name: "balanceOf",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ type: "uint256" }],
+  },
+] as const;
+
+// Check on-chain if user has ethosUSD balance (indicates they've claimed or received tokens)
+// This is more reliable than checking logs since Tempo RPC limits block range queries
+async function hasClaimedOnChain(address: string): Promise<boolean> {
+  try {
+    const client = createTempoPublicClient();
+    
+    // Check user's ethosUSD balance
+    const balance = await client.readContract({
+      address: CONTRACTS.ETHOS_USD_TOKEN,
+      abi: TIP20_BALANCE_ABI,
+      functionName: "balanceOf",
+      args: [address.toLowerCase() as `0x${string}`],
+    });
+    
+    // If they have any ethosUSD balance, they've likely claimed
+    // (Since the primary way to get ethosUSD is through claiming)
+    return balance > 0n;
+  } catch (err) {
+    console.error("Error checking on-chain balance:", err);
+    return false; // Fall back to local check if on-chain check fails
+  }
+}
 
 export interface ClaimRecord {
   address: string;
@@ -21,19 +57,12 @@ interface ClaimRecordJSON {
   timestamp: number;
 }
 
-// In-memory cache of claims
-let claimsCache: Map<string, ClaimRecord> | null = null;
-
-// Load claims from file
+// Load claims from file (always reads fresh for reliability)
 async function loadClaims(): Promise<Map<string, ClaimRecord>> {
-  if (claimsCache) {
-    return claimsCache;
-  }
-
   try {
     const content = await Deno.readTextFile(CLAIMS_FILE);
     const records: ClaimRecordJSON[] = JSON.parse(content);
-    claimsCache = new Map(
+    return new Map(
       records.map((r) => [
         r.address.toLowerCase(),
         {
@@ -45,10 +74,8 @@ async function loadClaims(): Promise<Map<string, ClaimRecord>> {
     );
   } catch {
     // File doesn't exist or is invalid, start with empty map
-    claimsCache = new Map();
+    return new Map();
   }
-
-  return claimsCache;
 }
 
 // Save claims to file
@@ -98,7 +125,6 @@ export async function recordClaim(
   };
 
   claims.set(address.toLowerCase(), record);
-  claimsCache = claims;
   
   await saveClaims(claims);
 }
@@ -115,7 +141,21 @@ export async function getClaimableAmount(address: string): Promise<{
   claimRecord?: ClaimRecord;
   error?: string;
 }> {
-  // Check if already claimed
+  // First check on-chain if they've received a mint (most reliable)
+  const claimedOnChain = await hasClaimedOnChain(address);
+  if (claimedOnChain) {
+    // Try to get local record for details, but we know they claimed
+    const existingClaim = await getClaimRecord(address);
+    return {
+      canClaim: false,
+      amount: 0n,
+      xp: existingClaim?.xp ?? 0,
+      alreadyClaimed: true,
+      claimRecord: existingClaim ?? undefined,
+    };
+  }
+
+  // Also check local file (belt and suspenders)
   const existingClaim = await getClaimRecord(address);
   if (existingClaim) {
     return {
